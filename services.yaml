@@ -1,0 +1,29 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # Guzzle is a third-party class, so it needs an explicit service definition
+    # for '@GuzzleHttp\Client' to resolve.
+    GuzzleHttp\Client:
+        class: GuzzleHttp\Client
+
+    # OXID 7 ships no guaranteed built-in PSR-16 file cache service, so define
+    # our own filesystem-backed PSR-16 cache.
+    Gutschify\Cache\FilesystemAdapter:
+        class: Symfony\Component\Cache\Adapter\FilesystemAdapter
+        arguments:
+            $namespace: 'gutschify'
+            $defaultLifetime: 3600
+
+    Gutschify\Cache\Psr16Cache:
+        class: Symfony\Component\Cache\Psr16Cache
+        arguments:
+            $pool: '@Gutschify\Cache\FilesystemAdapter'
+
+    Gutschify\Service\GutschifyService:
+        # Public so the widget controller can fetch it from the container.
+        public: true
+        arguments:
+            $httpClient: '@GuzzleHttp\Client'
+            $cache: '@Gutschify\Cache\Psr16Cache'

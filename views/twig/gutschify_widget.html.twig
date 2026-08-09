@@ -1,0 +1,18 @@
+{% if gutschify_widget_title %}
+    <h3 class="gutschify-widget-title">{{ gutschify_widget_title }}</h3>
+{% endif %}
+
+{% if gutschify_error %}
+    <div class="gutschify-widget-error">
+        <p>{{ gutschify_error }}</p>
+    </div>
+{% elseif gutschify_content %}
+    <div class="gutschify-widget">
+        {{ gutschify_content|raw }}
+    </div>
+{% else %}
+    <div class="gutschify-widget-error">
+        <p>Content could not be loaded.</p>
+    </div>
+{% endif %}
+

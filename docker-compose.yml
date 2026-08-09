@@ -1,0 +1,45 @@
+services:
+  oxid7-mysql:
+    image: mysql:8.0
+    container_name: oxid7-mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: oxid7
+      MYSQL_USER: oxid7
+      MYSQL_PASSWORD: oxid7
+    volumes:
+      - oxid7-mysql-data:/var/lib/mysql
+    ports:
+      - "3308:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uoxid7", "-poxid7"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  oxid7-web:
+    build:
+      context: ./docker
+    container_name: oxid7-web
+    depends_on:
+      oxid7-mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: oxid7-mysql
+      DB_NAME: oxid7
+      DB_USER: oxid7
+      DB_PASS: oxid7
+      SHOP_URL: http://localhost:8081
+      OXID_VERSION: "dev-b-7.4-ce"
+    volumes:
+      # The module source, mounted so Composer can install it as a path repo.
+      - ./:/module
+      # The provisioned OXID 7 shop lives here and survives restarts.
+      - oxid7-oxid:/var/www/html
+    ports:
+      - "8081:80"
+
+volumes:
+  oxid7-mysql-data:
+  oxid7-oxid:
